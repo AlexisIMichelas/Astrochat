@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Services\Mercure;
 
-use Lcobucci\JWT\Builder;
+use Lcobucci\JWT\Token\Builder;
 use Lcobucci\JWT\Signer\Hmac\Sha256;
-use Lcobucci\JWT\Signer\Key;
+use Lcobucci\JWT\Signer\Key\InMemory;
+use Lcobucci\JWT\Encoding\ChainedFormatter;
+use Lcobucci\JWT\Encoding\JoseEncoder;
 
 class JWTProvider
 {
@@ -20,10 +22,16 @@ class JWTProvider
     public function __invoke(): string
     {
         $signer = new Sha256();
+        $signingKey = InMemory::plainText($this->key);
 
-        return (new Builder())
+        $encoder = new JoseEncoder();
+        $formatter = ChainedFormatter::default();
+
+        $tokenBuilder = new Builder($encoder, $formatter);
+
+        return $tokenBuilder
             ->withClaim('mercure', ['publish' => ['*']])
-            ->getToken($signer, new Key($this->key))
-            ->__toString();
+            ->getToken($signer, $signingKey)
+            ->toString();
     }
 }

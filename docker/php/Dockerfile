@@ -1,12 +1,12 @@
-FROM php:7.4-fpm-alpine
+FROM php:8.2-fpm-alpine
 
 RUN apk update --no-cache \
     && apk add --no-cache --virtual build-deps \
-        postgresql-dev \
+        libpq-dev \
     && apk add --no-cache \
         curl
 
-RUN docker-php-ext-install pdo pdo_pgsql
+RUN docker-php-ext-install pdo pdo_mysql
 
 RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer && \
     ln -s $(composer config --global home) /root/composer
